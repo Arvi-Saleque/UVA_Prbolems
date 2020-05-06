@@ -1,0 +1,151 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define plll pair<pll,ll>
+#define ff first
+#define ss second
+#define sfi(a) scanf("%d",&a)
+#define sfi2(a,b) scanf("%d %d",&a,&b)
+#define sfi3(a,b,c) scanf("%d %d %d",&a,&b,&c)
+#define sfll(a) scanf("%lld",&a)
+#define all(a) a.begin(),a.end()
+#define inf 1e7
+#define m_p make_pair
+#define min3(a,b,c) min(a,min(b,c))
+#define pb push_back
+#define mem(x,val) memset(x,val,sizeof(x))
+#define read freopen("input.txt","r",stdin)
+#define write freopen("output.txt","w",stdout)
+#define FAST  ios_base::sync_with_stdio(0);cout.tie(0)
+#define sqr(x) ((x)*(x))
+
+using ll = long long int;
+const ll sz = 51;
+const ll mod = 1000000007;
+
+int kx[] = {1,-1,0,0};
+int ky[] = {0,0,1,-1};
+// 0->D, 1->U,2->R,3->L
+// South north east west
+unordered_map<string,int> mp {{"south",0},{"north",1},{"east",2},{"west",3}};
+struct node{
+    int xx,yy,dir;
+    node(){};
+    node(int _x,int _y,int _d){
+        xx = _x;
+        yy = _y;
+        dir = _d;
+    }
+};
+
+int r,c,b1,b2,e1,e2,grid[sz+10][sz+10];
+//pii par_a[sz+10][sz+10];
+int level[sz+1][sz+1][5];
+bool vis[sz+1][sz+1][5];
+
+// check the validity
+bool valid(int x,int y){
+    if(x<=0 || y<=0 || x>=r || y >= c || grid[x][y]==1) return false;
+    else return true;
+}
+
+void bfs(int di){
+    for(int i=0;i<=sz;i++)
+        for(int j=0;j<=sz;j++)
+            for(int k=0;k<=4;k++)
+                level[i][j][k] = 500;
+    queue<node> pq;
+    pq.push(node(b1,b2,di));
+    level[b1][b2][di] = 0;
+    while(!pq.empty()){
+        node par = pq.front();
+        pq.pop();
+        /// this loop for direction
+        for(int i=0;i<4;i++){
+                // this loop for step
+            for(int j=1;j<=3;j++){
+                int x = par.xx + (kx[i]*j);
+                int y = par.yy + (ky[i]*j);
+                if(valid(x,y)){
+                    int dis = level[x][y][i];
+                    int par_d = level[par.xx][par.yy][par.dir];
+                    if(par.dir == i){ // same direction
+                        if(dis > (par_d+1)){
+                            level[x][y][i] = (par_d + 1);
+                            pq.push(node(x,y,i));
+                        }
+                    }
+                    else {
+                        if((par.dir==0 && i==1) || (par.dir==1 && i==0)){
+                            if(dis > (par_d+3)){
+                                level[x][y][i] = (par_d + 3);
+                                pq.push(node(x,y,i));
+                            }
+                        }
+                        else if((par.dir==2 && i==3) || (par.dir==3 && i==2)){
+                            if(dis > (par_d+3)){
+                                level[x][y][i] = (par_d + 3);
+                                pq.push(node(x,y,i));
+                            }
+                        }
+                        else {
+                            if(dis > (par_d+2)){
+                                level[x][y][i] = (par_d + 2);
+                                pq.push(node(x,y,i));
+                            }
+                        }
+                    }
+                }
+                else break; // block
+            }
+        }
+    }
+}
+
+/*bool check(int x,int y){
+    if(x==b1 && y==b2) return true;
+    else return false;
+}*/
+
+int main()
+{
+    //write;
+    //read;
+    while(scanf("%d %d",&r,&c)==2){
+        if(r==0 && c==0) break;
+        mem(grid,0);
+        for(int i=0;i<r;i++){
+            for(int j=0;j<c;j++){
+                int x; cin >> x;
+                if(x==1){
+                    grid[i][j] = 1;
+                    grid[i+1][j] = 1;
+                    grid[i][j+1] = 1;
+                    grid[i+1][j+1] = 1;
+                }
+            }
+        }
+        /*for(int i=0;i<r;i++){
+            for(int j=0;j<c;j++){
+                cout << grid[i][j] << " ";
+            }
+            cout << endl;
+        }*/
+        scanf("%d %d %d %d ",&b1,&b2,&e1,&e2);
+        string str; getline(cin,str);
+        bfs(mp[str]);
+        bool flag = false;
+        int tmp = 500;
+        for(int i=0;i<=3;i++){
+            if(level[e1][e2][i]!=500){
+                flag = true;
+                tmp = min(tmp,level[e1][e2][i]);
+            }
+        }
+        if(!flag) puts("-1");
+        else printf("%d\n",tmp);
+
+    }
+    return 0;
+}
